@@ -1,0 +1,2 @@
+# depluy-vite
+Vite-deploy
