@@ -1,5 +1,5 @@
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js';
-import {getDatabase, ref, push, onValue} from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js';
+import {getDatabase, ref, push, onValue, remove} from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js';
 
 
 const appSettings = {
@@ -28,12 +28,21 @@ addButtonEl.addEventListener("click", function() {
 })
 
 onValue(shoppingListInDB, function(snapshot) {
-  let itemsArray = Object.values(snapshot.val())
 
-  clearShoppingListEl()
+  if(snapshot.exists()){
+    let itemsArray = Object.entries(snapshot.val())
   
-  for (let i = 0; i < itemsArray.length; i++) {
-    appendItemToShoopingListEL(itemsArray[i])
+    clearShoppingListEl()
+    
+    for (let i = 0; i < itemsArray.length; i++) {
+      let currentItem = itemsArray[i]
+      let currentItemID = currentItem[0]
+      let currentItemValue = currentItem[1]
+  
+      appendItemToShoopingListEL(currentItem)
+    }
+  } else{
+    shoppingListEl.innerHTML = "No hay lista de compra"
   }
 })
 
@@ -45,6 +54,21 @@ function clearInputFieldEd(){
   inputFieldEl.value = ""
 }
 
-function appendItemToShoopingListEL(itemValue){
-  shoppingListEl.innerHTML += `<li>${itemValue}</li>`;
+function appendItemToShoopingListEL(item){
+  // shoppingListEl.innerHTML += `<li>${itemValue}</li>`;
+
+  let itemID = item[0]
+  let itemValue = item[1]
+
+  let newEl = document.createElement("li")
+
+  newEl.textContent = itemValue
+
+  newEl.addEventListener("click", function(){
+    let exactLocationOfItemInDB = ref(database, `shoppingList/${itemID}`)
+
+    remove(exactLocationOfItemInDB)
+  })
+
+  shoppingListEl.append(newEl)
 }
